@@ -27,6 +27,8 @@ class AArch64CallingConvention extends CallingConvention {
     //     Java: x1, x2, x3, x4, x5, x6, x7, x0, stack
     //   Native: x0, x1, x2, x3, x4, x5, x6, x7, stack
 
+    private static final int BARRIER = 0x18000000;
+
     @Override
     public void javaToNative(ByteBuffer buf, Class<?>[] types, Annotation[][] annotations) {
         if (types.length >= 8) {
@@ -66,5 +68,10 @@ class AArch64CallingConvention extends CallingConvention {
         if (a3 != 0) buf.putInt(0xf2e00009 | a3 << 5);  // movk x9, #0xffff, lsl #48
 
         buf.putInt(0xd61f0120);                         // br x9
+    }
+
+    @Override
+    public void setNMethodBarrier(ByteBuffer buf) {
+        buf.putInt(BARRIER);
     }
 }

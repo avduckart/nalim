@@ -54,6 +54,8 @@ abstract class CallingConvention {
 
     abstract void emitCall(ByteBuffer buf, long address);
 
+    abstract void setNMethodBarrier(ByteBuffer buf);
+
     protected static int baseOffset(Class<?> type, Annotation[] annotations) {
         if (type.isArray() && type.getComponentType().isPrimitive()) {
             return arrayBaseOffset(type);

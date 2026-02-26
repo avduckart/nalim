@@ -19,6 +19,7 @@
 package one.nalim;
 
 import jdk.vm.ci.code.site.DataPatch;
+import jdk.vm.ci.code.site.Mark;
 import jdk.vm.ci.code.site.Site;
 import jdk.vm.ci.hotspot.HotSpotCompiledCode;
 import jdk.vm.ci.hotspot.HotSpotCompiledNmethod;
@@ -117,6 +118,7 @@ public class Linker {
             callingConvention.javaToNative(buf, m.getParameterTypes(), m.getParameterAnnotations());
         }
         callingConvention.emitCall(buf, address);
+        callingConvention.setNMethodBarrier(buf);
 
         installCode(m, buf.array(), buf.position());
     }
@@ -150,11 +152,14 @@ public class Linker {
     public static void installCode(Method m, byte[] code, int length) {
         ResolvedJavaMethod rm = jvmci.getMetaAccess().lookupJavaMethod(m);
 
+        var sites = new Mark[1];
+        sites[0] = new Mark(20, (Object)7); // I'm sorry for this
+
         HotSpotCompiledNmethod nm = new HotSpotCompiledNmethod(
                 m.getName(),
                 code,
                 length,
-                new Site[0],
+                (Site[])sites,
                 new Assumptions.Assumption[0],
                 new ResolvedJavaMethod[0],
                 new HotSpotCompiledCode.Comment[0],

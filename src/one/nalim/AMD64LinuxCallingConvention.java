@@ -27,6 +27,10 @@ class AMD64LinuxCallingConvention extends CallingConvention {
     //     Java: rsi, rdx, rcx,  r8,  r9, rdi, stack
     //   Native: rdi, rsi, rdx, rcx,  r8,  r9, stack
 
+    private static final int ALLIGN = 4;
+
+    private static final int BARRIER = 0x41817f00;
+
     private static final int SAVE_LAST_ARG =
             0x4889f8;  // mov  rax, rdi
 
@@ -84,5 +88,11 @@ class AMD64LinuxCallingConvention extends CallingConvention {
     public void emitCall(ByteBuffer buf, long address) {
         buf.putShort((short) 0xb848).putLong(address);  // mov rax, address
         buf.putShort((short) 0xe0ff);                   // jmp rax
+    }
+
+    @Override
+    public void setNMethodBarrier(ByteBuffer buf) {
+        var pos = (buf.position()/ALLIGN + 1) * ALLIGN;
+        buf.putInt(pos, BARRIER);
     }
 }

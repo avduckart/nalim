@@ -28,6 +28,8 @@ class RISCV64CallingConvention extends CallingConvention {
     //     Java: x10, x11, x12, x13, x14, x15, x16, x17, stack
     //   Native: x10, x11, x12, x13, x14, x15, x16, x17, stack
 
+    private static final byte[] BARRIER = {0x00, 0x00, 0x02, (byte) 0x97, 0x00, 0x02, (byte) 0xe2, (byte) 0x83};
+
     @Override
     public void javaToNative(ByteBuffer buf, Class<?>[] types, Annotation[][] annotations) {
         // nothing to be done, the Java and Native calling convention are the same
@@ -54,5 +56,10 @@ class RISCV64CallingConvention extends CallingConvention {
         buf.putInt(0b0010011 | (t0 << 7) | (0b000 << 12) | (t0 << 15) | (a2 << 20)); // addi t0, t0, a2
         buf.putInt(0b0010011 | (t0 << 7) | (0b001 << 12) | (t0 << 15) | ( 6 << 20)); // slli t0, t0, 6
         buf.putInt(0b1100111 | (zr << 7) | (0b000 << 12) | (t0 << 15) | (a3 << 20)); // jalr a3(t0)
+    }
+
+    @Override
+    public void setNMethodBarrier(ByteBuffer buf) {
+        buf.put(BARRIER, 0, BARRIER.length);
     }
 }

@@ -27,6 +27,10 @@ class AMD64WindowsCallingConvention extends CallingConvention {
     //     Java: rdx,  r8,  r9, rdi, rsi, rcx, stack
     //   Native: rcx, rdx,  r8,  r9, stack
 
+    private static final int ALLIGN = 4;
+
+    private static final int BARRIER = 0x41817f00;
+
     private static final int[] MOVE_INT_ARG = {
             0x89d1,    // mov  ecx, edx
             0x4489c2,  // mov  edx, r8d
@@ -71,5 +75,11 @@ class AMD64WindowsCallingConvention extends CallingConvention {
     public void emitCall(ByteBuffer buf, long address) {
         buf.putShort((short) 0xb848).putLong(address);  // mov rax, address
         buf.putShort((short) 0xe0ff);                   // jmp rax
+    }
+
+    @Override
+    public void setNMethodBarrier(ByteBuffer buf) {
+        var pos = (buf.position()/ALLIGN + 1) * ALLIGN;
+        buf.putInt(pos, BARRIER);
     }
 }
