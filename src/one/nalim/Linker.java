@@ -118,9 +118,10 @@ public class Linker {
             callingConvention.javaToNative(buf, m.getParameterTypes(), m.getParameterAnnotations());
         }
         callingConvention.emitCall(buf, address);
+        var nBarrierOffset = buf.position();
         callingConvention.setNMethodBarrier(buf);
 
-        installCode(m, buf.array(), buf.position());
+        installCode(m, buf.array(), nBarrierOffset);
     }
 
     private static void checkMethodType(Method m) {
@@ -151,15 +152,13 @@ public class Linker {
 
     public static void installCode(Method m, byte[] code, int length) {
         ResolvedJavaMethod rm = jvmci.getMetaAccess().lookupJavaMethod(m);
-
-        var sites = new Mark[1];
-        sites[0] = new Mark(20, (Object)7); // I'm sorry for this
+        final Object ENTRY_BARRIER_PATCH = (Object)7;
 
         HotSpotCompiledNmethod nm = new HotSpotCompiledNmethod(
                 m.getName(),
                 code,
                 length,
-                (Site[])sites,
+                new Site[] { new Mark(length, ENTRY_BARRIER_PATCH) },
                 new Assumptions.Assumption[0],
                 new ResolvedJavaMethod[0],
                 new HotSpotCompiledCode.Comment[0],
