@@ -118,10 +118,10 @@ public class Linker {
             callingConvention.javaToNative(buf, m.getParameterTypes(), m.getParameterAnnotations());
         }
         callingConvention.emitCall(buf, address);
-        var nBarrierOffset = buf.position();
+        var nMethodBarrierOffset = buf.position();
         callingConvention.setNMethodBarrier(buf);
 
-        installCode(m, buf.array(), nBarrierOffset);
+        installCode(m, buf.array(), nMethodBarrierOffset);
     }
 
     private static void checkMethodType(Method m) {
@@ -150,15 +150,15 @@ public class Linker {
         installCode(m, code, code.length);
     }
 
-    public static void installCode(Method m, byte[] code, int length) {
+    public static void installCode(Method m, byte[] code, int nMethodBarrierOffset) {
         ResolvedJavaMethod rm = jvmci.getMetaAccess().lookupJavaMethod(m);
         final Object ENTRY_BARRIER_PATCH = (Object)7;
 
         HotSpotCompiledNmethod nm = new HotSpotCompiledNmethod(
                 m.getName(),
                 code,
-                length,
-                new Site[] { new Mark(length, ENTRY_BARRIER_PATCH) },
+                code.length,
+                new Site[] { new Mark(nMethodBarrierOffset, ENTRY_BARRIER_PATCH) },
                 new Assumptions.Assumption[0],
                 new ResolvedJavaMethod[0],
                 new HotSpotCompiledCode.Comment[0],
