@@ -3,6 +3,8 @@
 Nalim is a library for linking Java methods to native functions using
 [JVMCI](https://openjdk.org/jeps/243) (JVM compiler interface).
 
+---------- IMPORTANT !!! This fork supports JDK 21 but requires testing !!!
+
 Unlike other Java frameworks for native library access, nalim does not
 use JNI and therefore does not incur [JNI related overhead](https://stackoverflow.com/a/24747484/3448419).
 
